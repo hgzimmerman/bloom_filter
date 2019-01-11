@@ -3,6 +3,7 @@ use crate::hash_to_indicies::HashToIndices;
 use crate::hash_to_indicies::K as GetK;
 use crate::bloom_filter::BloomFilter;
 use crate::rehasher::ReHasher;
+use crate::hash_to_indicies::K;
 
 
 /// A bloom filter that counts on each insertion so that it can give a reliable
@@ -19,6 +20,15 @@ impl <T, H> CountingBloomFilter<T, ReHasher<H>> {
         let bloom_filter = BloomFilter::optimal_new(n, p);
         CountingBloomFilter {
             bloom_filter,
+            count: 0
+        }
+    }
+}
+
+impl <T, H> CountingBloomFilter<T, H> where H: HashToIndices + GetK {
+    pub fn with_rate(expected_elements: usize, error_rate: f64, k: H) -> Self {
+        CountingBloomFilter {
+            bloom_filter: BloomFilter::with_rate(expected_elements, error_rate, k),
             count: 0
         }
     }
@@ -65,9 +75,17 @@ where
     /// Returns an **estimate** of the current chance that any given lookup will return a false positive.
     pub fn false_positive_chance(&self) -> f64 {
         use crate::false_positive_rate as fpr;
-        fpr(self.bloom_filter.2.k(), self.count, self.bloom_filter.num_bits())
+        fpr(self.bloom_filter.k.k(), self.count, self.bloom_filter.num_bits())
     }
 }
+
+impl <T, U: K> K for CountingBloomFilter<T,U> {
+    fn k(&self) -> usize {
+        self.bloom_filter.k.k()
+    }
+}
+
+
 
 #[cfg(test)]
 mod tests {

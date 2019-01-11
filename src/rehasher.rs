@@ -59,8 +59,12 @@ mod tests {
     fn re_hasher_different_outputs_hello() {
         let rehasher: ReHasher<MurmurHasher> = ReHasher::new(3);
         let indices = rehasher.hash_to_indices(&"hello", 1000);
-        assert_eq!(indices, vec![26, 16, 434])
+        assert_eq!(indices, vec![26, 16, 434]);
+        let rehasher: ReHasher<MurmurHasher> = ReHasher::new(4);
+        let indices = rehasher.hash_to_indices(&"hello", 1000);
+        assert_eq!(indices, vec![26, 16, 434, 927])
     }
+
     #[test]
     fn re_hasher_different_outputs_there() {
         let rehasher: ReHasher<MurmurHasher> = ReHasher::new(4);

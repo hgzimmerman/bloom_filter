@@ -8,6 +8,7 @@ use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 use crate::hash_to_indicies::HashToIndices;
 use crate::rehasher::ReHasher;
+use crate::hash_to_indicies::K;
 
 /// A variant of a bloom filter with the insert method taking &self, so no mutable reference to the datastructure is needed.
 /// This should be thread safe because:
@@ -59,6 +60,18 @@ impl <T, H> WLockBloomFilter<T, ReHasher<H>> {
             is_writing: AtomicBool::new(false),
             type_info: PhantomData,
             k: Box::new(ReHasher::new(k))
+        }
+    }
+}
+
+impl <T, H> WLockBloomFilter<T, H> where H: HashToIndices + K {
+    pub fn with_rate(expected_elements: usize, error_rate: f64, k: H) -> Self {
+        let m = crate::m_from_knp(k.k(), expected_elements, error_rate);
+        WLockBloomFilter {
+            bit_vec: Box::into_raw(Box::new(BitVec::from_elem(m, false))),
+            is_writing: AtomicBool::new(false),
+            type_info: PhantomData,
+            k: Box::new(k)
         }
     }
 }
@@ -117,8 +130,29 @@ impl <T, K> WLockBloomFilter<T, K>
     }
 }
 
+impl <T, U: K> K for WLockBloomFilter<T,U> {
+    fn k(&self) -> usize {
+        self.k.k()
+    }
+}
+
+
 impl <T,K>  Drop for WLockBloomFilter<T, K> {
     fn drop(&mut self) {
         unsafe {let _ = Box::from_raw(self.bit_vec);}
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use murmur3::murmur3_32::MurmurHasher;
+
+    #[test]
+    fn optimal_constructor() {
+        let bf : WLockBloomFilter<&str, ReHasher<MurmurHasher>> = WLockBloomFilter::optimal_new(1000, 0.01);
+        assert_eq!(bf.num_bits(), 9586);
+        assert_eq!(bf.k(), 7)
+    }
+
 }

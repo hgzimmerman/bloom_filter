@@ -15,18 +15,21 @@ pub use crate::bloom_filter::BloomFilter;
 /// k: number of hash functions
 /// n: number of elements
 /// m: number of bits
-pub fn false_positive_rate(k: usize, n: usize, m: usize ) -> f64 {
+pub fn false_positive_rate(k: usize, n: usize, m: usize) -> f64 {
     use std::f64::consts::E;
     (1.0 - E.powf(((0-k as isize)*n as isize) as f64/m as f64)).powi(k as i32)
 }
 
-/// Note: This is irrespective of K,
-/// This also assumes an optimal K value
+pub fn m_from_knp(k: usize, n: usize, p: f64) -> usize {
+    -((k * n) as f64 / (1f64 - p.powf(1.0/(k as f64) )).ln()) as usize
+}
+
 /// m = ceil((n * log(p)) / log(1 / pow(2, log(2))))
 pub fn needed_size(n: usize, p: f64) -> usize {
     ((n as f64 * p.ln()) / (1.0 / 2f64.powf(2f64.ln())).ln()).ceil() as usize
 }
 
+/// This gets the optimal k value assuming a given n and m.
 pub fn optimal_k(n: usize, m: usize) -> usize {
     ((m/n) as f64 * 2f64.ln()).ceil() as usize
 }
@@ -46,6 +49,18 @@ mod tests {
         let m = 28756;
         let k = optimal_k(2000, m);
         assert_eq!(k, 10)
+    }
+
+    #[test]
+    fn solve_for_m() {
+        let p = false_positive_rate(4, 1000, 10000);
+        let m = m_from_knp(4, 1000, p);
+        assert_eq!(m, 10000)
+    }
+
+    #[test]
+    fn aoeuaoeu() {
+
     }
 
 }

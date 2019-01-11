@@ -5,6 +5,7 @@ use crate::hash_to_indicies::K as GetK;
 use crate::w_lock_bloom_filter::WLockBloomFilter;
 use std::sync::atomic::AtomicUsize;
 use crate::rehasher::ReHasher;
+use crate::hash_to_indicies::K;
 
 
 /// A bloom filter with a spinlock permitting writes and an atomic counter to allow
@@ -21,6 +22,15 @@ impl <T, H> CountingWLockBloomFilter<T, ReHasher<H>> {
         let bloom_filter = WLockBloomFilter::optimal_new(n, p);
         CountingWLockBloomFilter {
             bloom_filter,
+            count: AtomicUsize::new(0)
+        }
+    }
+}
+
+impl <T, H> CountingWLockBloomFilter<T, H> where H: HashToIndices + GetK {
+    pub fn with_rate(expected_elements: usize, error_rate: f64, k: H) -> Self {
+        CountingWLockBloomFilter {
+            bloom_filter: WLockBloomFilter::with_rate(expected_elements, error_rate, k),
             count: AtomicUsize::new(0)
         }
     }
@@ -69,4 +79,25 @@ impl <T, K> CountingWLockBloomFilter<T, K>
         use crate::false_positive_rate as fpr;
         fpr(self.bloom_filter.k.k(), self.count.load(Ordering::Relaxed), self.bloom_filter.num_bits())
     }
+}
+
+
+impl <T, U: K> K for CountingWLockBloomFilter<T,U> {
+    fn k(&self) -> usize {
+        self.bloom_filter.k.k()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use murmur3::murmur3_32::MurmurHasher;
+
+    #[test]
+    fn optimal_constructor() {
+        let bf : CountingWLockBloomFilter<&str, ReHasher<MurmurHasher>> = CountingWLockBloomFilter::optimal_new(1000, 0.01);
+        assert_eq!(bf.num_bits(), 9586);
+        assert_eq!(bf.k(), 7)
+    }
+
 }
