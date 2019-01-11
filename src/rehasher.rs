@@ -1,18 +1,18 @@
 use crate::hash_to_indicies::HashToIndices;
-use std::hash::Hasher;
-use std::hash::Hash;
 use crate::hash_to_indicies::K;
-use std::hash::BuildHasherDefault;
 use std::hash::BuildHasher;
+use std::hash::BuildHasherDefault;
+use std::hash::Hash;
+use std::hash::Hasher;
 
 /// A struct when made to hash a value to indices into the bloom filter,
 /// will reuse the same hashbuffer multiple times,
 /// seeding the each iteration with the last's buffer state.
 pub struct ReHasher<T> {
     k: usize,
-    hasher: BuildHasherDefault<T>
+    hasher: BuildHasherDefault<T>,
 }
-impl <T> ReHasher<T> {
+impl<T> ReHasher<T> {
     /// Creates a new ReHasher
     ///
     /// # Arguments
@@ -20,22 +20,22 @@ impl <T> ReHasher<T> {
     pub fn new(k: usize) -> Self {
         ReHasher {
             k,
-            hasher: BuildHasherDefault::default()
+            hasher: BuildHasherDefault::default(),
         }
     }
 }
 
-impl <T: Default> Default for ReHasher<T> {
+impl<T: Default> Default for ReHasher<T> {
     fn default() -> Self {
         ReHasher {
             /// 4 is a good number, but default() isn't really how this should be constructed
             k: 4,
-            hasher: BuildHasherDefault::default()
+            hasher: BuildHasherDefault::default(),
         }
     }
 }
 
-impl <H: Hasher + Default> HashToIndices for ReHasher<H> {
+impl<H: Hasher + Default> HashToIndices for ReHasher<H> {
     fn hash_to_indices<T: Hash>(&self, value: &T, modulus: usize) -> Vec<usize> {
         let mut h = self.hasher.build_hasher();
         (0..self.k)
@@ -47,12 +47,11 @@ impl <H: Hasher + Default> HashToIndices for ReHasher<H> {
     }
 }
 
-impl <H> K for ReHasher<H> {
+impl<H> K for ReHasher<H> {
     fn k(&self) -> usize {
         self.k
     }
 }
-
 
 #[cfg(test)]
 mod tests {

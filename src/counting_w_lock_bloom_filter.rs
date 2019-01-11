@@ -1,21 +1,20 @@
-use std::hash::Hash;
 use crate::hash_to_indicies::HashToIndices;
-use std::sync::atomic::Ordering;
 use crate::hash_to_indicies::K as GetK;
-use crate::w_lock_bloom_filter::WLockBloomFilter;
-use std::sync::atomic::AtomicUsize;
-use crate::rehasher::ReHasher;
 use crate::hash_to_indicies::K;
-
+use crate::rehasher::ReHasher;
+use crate::w_lock_bloom_filter::WLockBloomFilter;
+use std::hash::Hash;
+use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::Ordering;
 
 /// A bloom filter with a spinlock permitting writes and an atomic counter to allow
 /// assessing the percentage chance of a false positive.
-pub struct CountingWLockBloomFilter<T, K>{
-    bloom_filter: WLockBloomFilter<T,K>,
+pub struct CountingWLockBloomFilter<T, K> {
+    bloom_filter: WLockBloomFilter<T, K>,
     count: AtomicUsize,
 }
 
-impl <T, H> CountingWLockBloomFilter<T, ReHasher<H>> {
+impl<T, H> CountingWLockBloomFilter<T, ReHasher<H>> {
     /// Constructs a new BloomFilter with an optimal ratio of m and k,
     /// derived from n and p inputs.
     ///
@@ -31,16 +30,19 @@ impl <T, H> CountingWLockBloomFilter<T, ReHasher<H>> {
     /// use murmur3::murmur3_32::MurmurHasher;
     /// let bf = CountingWLockBloomFilter::<&str, ReHasher<MurmurHasher>>::optimal_new(10000, 0.001);
     /// ```
-    pub fn optimal_new(n: usize, p: f64)  -> Self {
+    pub fn optimal_new(n: usize, p: f64) -> Self {
         let bloom_filter = WLockBloomFilter::optimal_new(n, p);
         CountingWLockBloomFilter {
             bloom_filter,
-            count: AtomicUsize::new(0)
+            count: AtomicUsize::new(0),
         }
     }
 }
 
-impl <T, H> CountingWLockBloomFilter<T, H> where H: HashToIndices + GetK {
+impl<T, H> CountingWLockBloomFilter<T, H>
+where
+    H: HashToIndices + GetK,
+{
     /// Given a fixed size `k`, and an expected number of elements (`n`),
     /// initialize the bloom filter with a computed `m` value to achieve the required error rate.
     ///
@@ -68,15 +70,15 @@ impl <T, H> CountingWLockBloomFilter<T, H> where H: HashToIndices + GetK {
     pub fn with_rate(n: usize, p: f64, hashers: H) -> Self {
         CountingWLockBloomFilter {
             bloom_filter: WLockBloomFilter::with_rate(n, p, hashers),
-            count: AtomicUsize::new(0)
+            count: AtomicUsize::new(0),
         }
     }
 }
 
-impl <T, K> CountingWLockBloomFilter<T, K>
-    where
-        T: Hash,
-        K: HashToIndices + GetK
+impl<T, K> CountingWLockBloomFilter<T, K>
+where
+    T: Hash,
+    K: HashToIndices + GetK,
 {
     /// Creates the bloom filter with a given number of bits
     /// and with a multiple-hashing-to-index function.
@@ -171,12 +173,15 @@ impl <T, K> CountingWLockBloomFilter<T, K>
     /// assert_eq!(bf.false_positive_chance(), 0.009950166250831893 );
     pub fn false_positive_chance(&self) -> f64 {
         use crate::false_positive_rate as fpr;
-        fpr(self.bloom_filter.k.k(), self.count.load(Ordering::Relaxed), self.bloom_filter.num_bits())
+        fpr(
+            self.bloom_filter.k.k(),
+            self.count.load(Ordering::Relaxed),
+            self.bloom_filter.num_bits(),
+        )
     }
 }
 
-
-impl <T, U: K> K for CountingWLockBloomFilter<T,U> {
+impl<T, U: K> K for CountingWLockBloomFilter<T, U> {
     fn k(&self) -> usize {
         self.bloom_filter.k.k()
     }
@@ -189,7 +194,8 @@ mod tests {
 
     #[test]
     fn optimal_constructor() {
-        let bf : CountingWLockBloomFilter<&str, ReHasher<MurmurHasher>> = CountingWLockBloomFilter::optimal_new(1000, 0.01);
+        let bf: CountingWLockBloomFilter<&str, ReHasher<MurmurHasher>> =
+            CountingWLockBloomFilter::optimal_new(1000, 0.01);
         assert_eq!(bf.num_bits(), 9586);
         assert_eq!(bf.k(), 7)
     }

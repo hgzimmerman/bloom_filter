@@ -9,14 +9,12 @@ pub trait HashToIndices: Default {
     /// resulting hash value.
     /// The usizes in the returned vector are only considered indices because they are constrained to
     /// the size of the BitVec used in the BloomFilter.
-    #[inline]
-    fn hash_to_indices<T: Hash>(&self, value:  &T, modulus: usize) -> Vec<usize>;
+    fn hash_to_indices<T: Hash>(&self, value: &T, modulus: usize) -> Vec<usize>;
 }
 
 pub trait K {
     /// A function that returns the k value for a given implementor.
     /// The `k` value should correspond to how many indices will be produced
     /// when hash_to_indicies() is called on it.
-    #[inline]
     fn k(&self) -> usize;
 }

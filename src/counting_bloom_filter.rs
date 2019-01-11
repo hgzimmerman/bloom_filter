@@ -1,22 +1,20 @@
-use std::hash::Hash;
+use crate::bloom_filter::BloomFilter;
 use crate::hash_to_indicies::HashToIndices;
 use crate::hash_to_indicies::K as GetK;
-use crate::bloom_filter::BloomFilter;
-use crate::rehasher::ReHasher;
 use crate::hash_to_indicies::K;
-
+use crate::rehasher::ReHasher;
+use std::hash::Hash;
 
 /// A bloom filter that counts on each insertion so that it can give a reliable estimate of
 /// a false positive rate at its current occupancy level.
-pub struct CountingBloomFilter<T,K>{
+pub struct CountingBloomFilter<T, K> {
     /// Backing bloom filter.
-    bloom_filter: BloomFilter<T,K>,
+    bloom_filter: BloomFilter<T, K>,
     /// The counter that keeps track of the number of elements inserted.
-    count: usize
+    count: usize,
 }
 
-
-impl <T, H> CountingBloomFilter<T, ReHasher<H>> {
+impl<T, H> CountingBloomFilter<T, ReHasher<H>> {
     /// Constructs a new BloomFilter with an optimal ratio of m and k,
     /// derived from n and p inputs.
     ///
@@ -32,16 +30,19 @@ impl <T, H> CountingBloomFilter<T, ReHasher<H>> {
     /// use murmur3::murmur3_32::MurmurHasher;
     /// let bf = CountingBloomFilter::<&str, ReHasher<MurmurHasher>>::optimal_new(10000, 0.001);
     /// ```
-    pub fn optimal_new(n: usize, p: f64)  -> Self {
+    pub fn optimal_new(n: usize, p: f64) -> Self {
         let bloom_filter = BloomFilter::optimal_new(n, p);
         CountingBloomFilter {
             bloom_filter,
-            count: 0
+            count: 0,
         }
     }
 }
 
-impl <T, H> CountingBloomFilter<T, H> where H: HashToIndices + GetK {
+impl<T, H> CountingBloomFilter<T, H>
+where
+    H: HashToIndices + GetK,
+{
     /// Given a fixed size `k`, and an expected number of elements (`n`),
     /// initialize the bloom filter with a computed `m` value to achieve the required error rate.
     ///
@@ -69,15 +70,15 @@ impl <T, H> CountingBloomFilter<T, H> where H: HashToIndices + GetK {
     pub fn with_rate(expected_elements: usize, error_rate: f64, k: H) -> Self {
         CountingBloomFilter {
             bloom_filter: BloomFilter::with_rate(expected_elements, error_rate, k),
-            count: 0
+            count: 0,
         }
     }
 }
 
-impl <T,K> CountingBloomFilter<T,K>
+impl<T, K> CountingBloomFilter<T, K>
 where
     T: Hash,
-    K: HashToIndices + GetK
+    K: HashToIndices + GetK,
 {
     /// Creates the bloom filter with a given number of bits and with a multiple-hashing-to-index function.
     ///
@@ -95,7 +96,7 @@ where
     pub fn new(m: usize, hashers: K) -> Self {
         CountingBloomFilter {
             bloom_filter: BloomFilter::new(m, hashers),
-            count: 0
+            count: 0,
         }
     }
 
@@ -173,34 +174,37 @@ where
     /// assert_eq!(bf.false_positive_chance(), 0.009950166250831893 );
     pub fn false_positive_chance(&self) -> f64 {
         use crate::false_positive_rate as fpr;
-        fpr(self.bloom_filter.k.k(), self.count, self.bloom_filter.num_bits())
+        fpr(
+            self.bloom_filter.k.k(),
+            self.count,
+            self.bloom_filter.num_bits(),
+        )
     }
 }
 
-impl <T, U: K> K for CountingBloomFilter<T,U> {
+impl<T, U: K> K for CountingBloomFilter<T, U> {
     fn k(&self) -> usize {
         self.bloom_filter.k.k()
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use murmur3::murmur3_32::MurmurHasher;
     use crate::hash_numbers::One;
+    use murmur3::murmur3_32::MurmurHasher;
 
     #[test]
     fn new_false_positive() {
-        let cbf: CountingBloomFilter<&str, One<MurmurHasher>> = CountingBloomFilter::new(10_000, One::default());
+        let cbf: CountingBloomFilter<&str, One<MurmurHasher>> =
+            CountingBloomFilter::new(10_000, One::default());
         assert_eq!(cbf.false_positive_chance(), 0.0);
     }
 
-
     #[test]
     fn full_false_positive() {
-        let mut cbf: CountingBloomFilter<&str, One<MurmurHasher>> = CountingBloomFilter::new(10, One::default());
+        let mut cbf: CountingBloomFilter<&str, One<MurmurHasher>> =
+            CountingBloomFilter::new(10, One::default());
         cbf.insert(&"a");
         cbf.insert(&"b");
         cbf.insert(&"c");
@@ -211,10 +215,11 @@ mod tests {
         cbf.insert(&"h");
         cbf.insert(&"i");
         cbf.insert(&"j");
-        assert_eq!(cbf.false_positive_chance(), 0.6321205588285577,
-                   "This shouldn't be 1.0 as may be expected, because if some _do_collide,\
-                then there would be a lower chance of others colliding");
+        assert_eq!(
+            cbf.false_positive_chance(),
+            0.6321205588285577,
+            "This shouldn't be 1.0 as may be expected, because if some _do_collide,\
+             then there would be a lower chance of others colliding"
+        );
     }
 }
-
-

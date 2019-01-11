@@ -3,20 +3,20 @@
 //! and number of bits in the filter (`m`).
 //! The false positive rate will increase as `n` rises, and will fall as `k` and `m` rise.
 
-
 pub mod bloom_filter;
-pub mod w_lock_bloom_filter;
-pub mod hash_numbers;
 pub mod counting_bloom_filter;
-pub mod rehasher;
 pub mod counting_w_lock_bloom_filter;
+pub mod hash_numbers;
 pub mod hash_to_indicies;
+pub mod rehasher;
+pub mod w_lock_bloom_filter;
 
 pub use crate::bloom_filter::BloomFilter;
 pub use crate::counting_bloom_filter::CountingBloomFilter;
-pub use crate::rehasher::ReHasher;
-pub use crate::w_lock_bloom_filter::WLockBloomFilter;
 pub use crate::counting_w_lock_bloom_filter::CountingWLockBloomFilter;
+pub use crate::w_lock_bloom_filter::WLockBloomFilter;
+
+pub use crate::rehasher::ReHasher;
 
 /// Calculates the ideal false positive rate.
 /// If the hashing functions that are used in a bloom filter produce a non-uniform distribution of hashes
@@ -27,7 +27,7 @@ pub use crate::counting_w_lock_bloom_filter::CountingWLockBloomFilter;
 /// m: number of bits
 pub fn false_positive_rate(k: usize, n: usize, m: usize) -> f64 {
     use std::f64::consts::E;
-    (1.0 - E.powf(((0-k as isize)*n as isize) as f64/m as f64)).powi(k as i32)
+    (1.0 - E.powf(((0 - k as isize) * n as isize) as f64 / m as f64)).powi(k as i32)
 }
 
 /// Gets the required number of bits (`m`) if given 'k', 'n' and 'p'.
@@ -36,7 +36,7 @@ pub fn false_positive_rate(k: usize, n: usize, m: usize) -> f64 {
 /// This is useful if you want to choose `k` beforehand for performance reasons,
 /// and you want to know how big the bloom filter will need to be to achieve a desired false positive rate.
 pub fn m_from_knp(k: usize, n: usize, p: f64) -> usize {
-    -((k * n) as f64 / (1f64 - p.powf(1.0/(k as f64) )).ln()) as usize
+    -((k * n) as f64 / (1f64 - p.powf(1.0 / (k as f64))).ln()) as usize
 }
 
 /// Gets the required number of bits (`m`) assuming an optimal `k`, using `n` and `p`.
@@ -47,9 +47,8 @@ pub fn optimal_m(n: usize, p: f64) -> usize {
 
 /// This gets the optimal k value given `n` and `m`.
 pub fn optimal_k(n: usize, m: usize) -> usize {
-    ((m/n) as f64 * 2f64.ln()).ceil() as usize
+    ((m / n) as f64 * 2f64.ln()).ceil() as usize
 }
-
 
 #[cfg(test)]
 mod tests {
