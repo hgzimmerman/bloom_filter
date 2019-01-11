@@ -27,7 +27,6 @@ use std::sync::atomic::Ordering;
 /// although that comes with a significant performance cost because the lock would persist
 /// while the hashing takes place, which is where the majority of time is spent.
 ///
-//TODO A better alternative would be to write a ExclusiveBloomFilter, with the spinlocks contesting both reading and writing operations.
 pub struct WLockBloomFilter<T, K>{
     pub(crate) bit_vec: *mut BitVec,
     is_writing: AtomicBool,

@@ -72,7 +72,6 @@ mod tests {
     use crate::hash_numbers::Two;
 
     use hashers::fnv::FNV1aHasher32;
-    use hashers::fx_hash::FxHasher;
     use crate::false_positive_rate;
     use crate::rehasher::ReHasher;
 
@@ -108,7 +107,8 @@ mod tests {
     fn false_positives_can_be_avoided_with_more_k() {
         let mut bf: BloomFilter<&str, Two<MurmurHasher, FNV1aHasher32>> = BloomFilter::new(5, Two::default());
         bf.insert(&"a");
-        assert!(!bf.contains(&"l"), "With two hashers, a and l should have one index be the same, but the other is allowed to be different, permitting avoidance of the false positive")
+        assert!(!bf.contains(&"l"), "With two hashers, a and l should have one index be the same,\
+         but the other is allowed to be different, permitting avoidance of the false positive")
     }
 
 }

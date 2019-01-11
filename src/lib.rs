@@ -3,6 +3,7 @@ pub mod w_lock_bloom_filter;
 pub mod hash_numbers;
 pub mod counting_bloom_filter;
 pub mod rehasher;
+pub mod counting_w_lock_bloom_filter;
 
 pub use crate::bloom_filter::BloomFilter;
 
