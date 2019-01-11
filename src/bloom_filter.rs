@@ -5,6 +5,7 @@ use crate::hash_to_indicies::HashToIndices;
 use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::fmt::Error;
+use crate::rehasher::ReHasher;
 
 
 /// A probabilistic datastructure that can quickly tell with complete accuracy if an element has _not_ been
@@ -17,6 +18,17 @@ impl <T, K> Debug for BloomFilter<T, K> {
         let mut s = String::new();
         self.0.iter().for_each(|b| if b {s.push('1')} else {s.push('0')});
         write!(f, "bit_vec: [{}]", s)
+    }
+}
+
+
+impl <T, H> BloomFilter<T, ReHasher<H>> {
+    /// n: number of expected elements.
+    /// p: false positive rate desired at `n`.
+    pub fn optimal_new(n: usize, p: f64)  -> Self {
+        let m = crate::needed_size(n, p);
+        let k = crate::optimal_k(n, m);
+        BloomFilter(BitVec::from_elem(m, false), PhantomData, Box::new(ReHasher::new(k)))
     }
 }
 

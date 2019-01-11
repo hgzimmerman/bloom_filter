@@ -7,6 +7,7 @@ use std::fmt::Error;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 use crate::hash_to_indicies::HashToIndices;
+use crate::rehasher::ReHasher;
 
 /// A variant of a bloom filter with the insert method taking &self, so no mutable reference to the datastructure is needed.
 /// This should be thread safe because:
@@ -45,6 +46,22 @@ impl <T, K> Debug for WLockBloomFilter<T, K> {
 unsafe impl <T,K> Send for WLockBloomFilter<T,K> where T: Send, K: Sync{}
 unsafe impl <T,K> Sync for WLockBloomFilter<T,K> where T: Sync, K: Sync{}
 
+
+
+impl <T, H> WLockBloomFilter<T, ReHasher<H>> {
+    /// n: number of expected elements.
+    /// p: false positive rate desired at `n`.
+    pub fn optimal_new(n: usize, p: f64)  -> Self {
+        let m = crate::needed_size(n, p);
+        let k = crate::optimal_k(n, m);
+        WLockBloomFilter{
+            bit_vec: Box::into_raw(Box::new(BitVec::from_elem(m, false))),
+            is_writing: AtomicBool::new(false),
+            type_info: PhantomData,
+            k: Box::new(ReHasher::new(k))
+        }
+    }
+}
 
 impl <T, K> WLockBloomFilter<T, K>
     where

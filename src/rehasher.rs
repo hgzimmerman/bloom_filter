@@ -4,6 +4,9 @@ use std::hash::Hasher;
 use std::hash::Hash;
 use crate::hash_to_indicies::K;
 
+/// A struct when made to hash a value to indices into the bloom filter,
+/// will reuse the same hashbuffer multiple times,
+/// seeding the each iteration with the last's buffer state.
 pub struct ReHasher<T>{
     k: usize,
     hasher: PhantomData<T>

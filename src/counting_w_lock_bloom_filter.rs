@@ -4,6 +4,7 @@ use std::sync::atomic::Ordering;
 use crate::hash_to_indicies::K as GetK;
 use crate::w_lock_bloom_filter::WLockBloomFilter;
 use std::sync::atomic::AtomicUsize;
+use crate::rehasher::ReHasher;
 
 
 /// A bloom filter with a spinlock permitting writes and an atomic counter to allow
@@ -11,6 +12,18 @@ use std::sync::atomic::AtomicUsize;
 pub struct CountingWLockBloomFilter<T, K>{
     bloom_filter: WLockBloomFilter<T,K>,
     count: AtomicUsize,
+}
+
+impl <T, H> CountingWLockBloomFilter<T, ReHasher<H>> {
+    /// n: number of expected elements.
+    /// p: false positive rate desired at `n`.
+    pub fn optimal_new(n: usize, p: f64)  -> Self {
+        let bloom_filter = WLockBloomFilter::optimal_new(n, p);
+        CountingWLockBloomFilter {
+            bloom_filter,
+            count: AtomicUsize::new(0)
+        }
+    }
 }
 
 impl <T, K> CountingWLockBloomFilter<T, K>

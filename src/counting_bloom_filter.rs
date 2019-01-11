@@ -2,12 +2,26 @@ use std::hash::Hash;
 use crate::hash_to_indicies::HashToIndices;
 use crate::hash_to_indicies::K as GetK;
 use crate::bloom_filter::BloomFilter;
+use crate::rehasher::ReHasher;
 
 
 /// A bloom filter that counts on each insertion so that it can give a reliable
 pub struct CountingBloomFilter<T,K>{
     bloom_filter: BloomFilter<T,K>,
     count: usize
+}
+
+
+impl <T, H> CountingBloomFilter<T, ReHasher<H>> {
+    /// n: number of expected elements.
+    /// p: false positive rate desired at `n`.
+    pub fn optimal_new(n: usize, p: f64)  -> Self {
+        let bloom_filter = BloomFilter::optimal_new(n, p);
+        CountingBloomFilter {
+            bloom_filter,
+            count: 0
+        }
+    }
 }
 
 impl <T,K> CountingBloomFilter<T,K>
