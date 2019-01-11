@@ -1,7 +1,7 @@
 use bit_vec::BitVec;
 use std::marker::PhantomData;
 use std::hash::Hash;
-use crate::hash_numbers::HashToIndices;
+use crate::hash_to_indicies::HashToIndices;
 use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::fmt::Error;

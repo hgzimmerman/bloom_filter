@@ -1,7 +1,7 @@
 use std::hash::Hash;
-use crate::hash_numbers::HashToIndices;
+use crate::hash_to_indicies::HashToIndices;
 use std::sync::atomic::Ordering;
-use crate::hash_numbers::K as GetK;
+use crate::hash_to_indicies::K as GetK;
 use crate::w_lock_bloom_filter::WLockBloomFilter;
 use std::sync::atomic::AtomicUsize;
 

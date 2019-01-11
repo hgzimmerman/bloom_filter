@@ -1,8 +1,8 @@
 use std::marker::PhantomData;
-use crate::hash_numbers::HashToIndices;
+use crate::hash_to_indicies::HashToIndices;
 use std::hash::Hasher;
 use std::hash::Hash;
-use crate::hash_numbers::K;
+use crate::hash_to_indicies::K;
 
 pub struct ReHasher<T>{
     k: usize,

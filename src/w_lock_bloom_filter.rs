@@ -1,12 +1,12 @@
 use bit_vec::BitVec;
 use std::marker::PhantomData;
 use std::hash::Hash;
-use crate::hash_numbers::HashToIndices;
 use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::fmt::Error;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
+use crate::hash_to_indicies::HashToIndices;
 
 /// A variant of a bloom filter with the insert method taking &self, so no mutable reference to the datastructure is needed.
 /// This should be thread safe because:

@@ -2,6 +2,8 @@ use std::hash::Hasher;
 use std::hash::Hash;
 use std::hash::BuildHasherDefault;
 use std::hash::BuildHasher;
+use crate::hash_to_indicies::K;
+use crate::hash_to_indicies::HashToIndices;
 
 #[derive(Default, Debug)]
 pub struct One<H>(BuildHasherDefault<H>);
@@ -14,16 +16,8 @@ pub struct Four<H1, H2, H3, H4>(BuildHasherDefault<H1>, BuildHasherDefault<H2>, 
 #[derive(Default, Debug)]
 pub struct Five<H1, H2, H3, H4, H5>(BuildHasherDefault<H1>, BuildHasherDefault<H2>, BuildHasherDefault<H3>, BuildHasherDefault<H4>, BuildHasherDefault<H5>);
 
-pub trait HashToIndices {
-    #[inline]
-    fn hash_to_indices<T: Hash>(&self, value:  &T, modulus: usize) -> Vec<usize>;
-}
 
-pub trait K {
-    #[inline]
-    fn k(&self) -> usize;
-}
-impl <H> K for H where H: BuildHasher {
+impl <H> K for BuildHasherDefault<H> {
     fn k(&self) -> usize {
         1
     }
@@ -31,30 +25,40 @@ impl <H> K for H where H: BuildHasher {
 
 impl <H> K for One<H> {
     fn k(&self) -> usize {
-        1
+        self.0.k()
     }
 }
 impl <H1, H2> K for Two<H1, H2> {
     fn k(&self) -> usize {
-        2
+        self.0.k()
+        + self.1.k()
     }
 }
 
 impl <H1, H2, H3> K for Three<H1, H2, H3> {
     fn k(&self) -> usize {
-        3
+        self.0.k()
+        + self.1.k()
+        + self.2.k()
     }
 }
 
 impl <H1, H2, H3, H4> K for Four<H1, H2, H3, H4> {
     fn k(&self) -> usize {
-        4
+        self.0.k()
+        + self.1.k()
+        + self.2.k()
+        + self.3.k()
     }
 }
 
 impl <H1, H2, H3, H4, H5> K for Five<H1, H2, H3, H4, H5> {
     fn k(&self) -> usize {
-        5
+        self.0.k()
+        + self.1.k()
+        + self.2.k()
+        + self.3.k()
+        + self.4.k()
     }
 }
 
@@ -68,7 +72,7 @@ impl <H: Hasher + Default> HashToIndices for One<H> {
 }
 
 
-impl <H: BuildHasher> HashToIndices for H {
+impl <H: BuildHasher + Default> HashToIndices for H {
     fn hash_to_indices<T: Hash>(&self, value: &T, modulus: usize) -> Vec<usize> {
         let mut h  = self.build_hasher();
         value.hash(&mut h);
