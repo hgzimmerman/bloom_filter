@@ -113,8 +113,7 @@ where
     ///
     /// # Arguments
     ///
-    /// * `value` - the value to be hashed to create indices into the bloom filter.
-    /// These indices will be used to see if the element has been added.
+    /// * `value` - The value to be hashed to create indices into the bloom filter.
     ///
     /// # Examples
     /// ```
@@ -138,8 +137,7 @@ where
     ///
     /// # Arguments
     ///
-    /// * `value` - the value to be hashed to create indices into the bloom filter.
-    /// These indices will be used to see if the element has been added.
+    /// * `value` - The value to be hashed to create indices into the bloom filter.
     ///
     /// # Examples
     /// ```

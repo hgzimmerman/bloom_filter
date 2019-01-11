@@ -67,7 +67,7 @@ impl <T, H> WLockBloomFilter<T, ReHasher<H>> {
     /// let bf = WLockBloomFilter::<&str, ReHasher<MurmurHasher>>::optimal_new(10000, 0.001);
     /// ```
     pub fn optimal_new(n: usize, p: f64)  -> Self {
-        let m = crate::needed_size(n, p);
+        let m = crate::optimal_m(n, p);
         let k = crate::optimal_k(n, m);
         WLockBloomFilter{
             bit_vec: Box::into_raw(Box::new(BitVec::from_elem(m, false))),
@@ -103,13 +103,13 @@ impl <T, H> WLockBloomFilter<T, H> where H: HashToIndices + K {
     /// use murmur3::murmur3_32::MurmurHasher;
     /// let bf = WLockBloomFilter::<&str, ReHasher<MurmurHasher>>::with_rate(10000, 0.001, ReHasher::new(1));
     /// ```
-    pub fn with_rate(expected_elements: usize, error_rate: f64, k: H) -> Self {
-        let m = crate::m_from_knp(k.k(), expected_elements, error_rate);
+    pub fn with_rate(n: usize, p: f64, hashers: H) -> Self {
+        let m = crate::m_from_knp(hashers.k(), n, p);
         WLockBloomFilter {
             bit_vec: Box::into_raw(Box::new(BitVec::from_elem(m, false))),
             is_writing: AtomicBool::new(false),
             type_info: PhantomData,
-            k: Box::new(k)
+            k: Box::new(hashers)
         }
     }
 }
@@ -132,12 +132,12 @@ impl <T, K> WLockBloomFilter<T, K>
     /// use murmur3::murmur3_32::MurmurHasher;
     /// let bf = WLockBloomFilter::<&str, ReHasher<MurmurHasher>>::new(100000, ReHasher::new(1));
     /// ```
-    pub fn new(num_bits: usize, k: K) -> Self {
+    pub fn new(m: usize, hashers: K) -> Self {
         WLockBloomFilter {
-            bit_vec: Box::into_raw(Box::new(BitVec::from_elem(num_bits, false))),
+            bit_vec: Box::into_raw(Box::new(BitVec::from_elem(m, false))),
             is_writing: AtomicBool::new(false),
             type_info: PhantomData,
-            k: Box::new(k)
+            k: Box::new(hashers)
         }
     }
 
@@ -157,8 +157,7 @@ impl <T, K> WLockBloomFilter<T, K>
     ///
     /// # Arguments
     ///
-    /// * `value` - the value to be hashed to create indices into the bloom filter.
-    /// These indices will be used to see if the element has been added.
+    /// * `value` - The value to be hashed to create indices into the bloom filter.
     ///
     /// # Examples
     /// ```
@@ -190,7 +189,7 @@ impl <T, K> WLockBloomFilter<T, K>
     ///
     /// # Arguments
     ///
-    /// * `value` - the value to be hashed to create indices into the bloom filter.
+    /// * `value` - The value to be hashed to create indices into the bloom filter.
     /// These indices will be used to see if the element has been added.
     ///
     /// # Examples

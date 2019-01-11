@@ -65,9 +65,9 @@ impl <T, H> CountingWLockBloomFilter<T, H> where H: HashToIndices + GetK {
     /// use murmur3::murmur3_32::MurmurHasher;
     /// let bf = CountingWLockBloomFilter::<&str, ReHasher<MurmurHasher>>::with_rate(10000, 0.001, ReHasher::new(1));
     /// ```
-    pub fn with_rate(expected_elements: usize, error_rate: f64, k: H) -> Self {
+    pub fn with_rate(n: usize, p: f64, hashers: H) -> Self {
         CountingWLockBloomFilter {
-            bloom_filter: WLockBloomFilter::with_rate(expected_elements, error_rate, k),
+            bloom_filter: WLockBloomFilter::with_rate(n, p, hashers),
             count: AtomicUsize::new(0)
         }
     }
@@ -91,9 +91,9 @@ impl <T, K> CountingWLockBloomFilter<T, K>
     /// use murmur3::murmur3_32::MurmurHasher;
     /// let bf = CountingWLockBloomFilter::<&str, ReHasher<MurmurHasher>>::new(100000, ReHasher::new(1));
     /// ```
-    pub fn new(num_bits: usize, k: K) -> Self {
+    pub fn new(m: usize, hashers: K) -> Self {
         CountingWLockBloomFilter {
-            bloom_filter: WLockBloomFilter::new(num_bits, k),
+            bloom_filter: WLockBloomFilter::new(m, hashers),
             count: AtomicUsize::new(0),
         }
     }
@@ -112,8 +112,7 @@ impl <T, K> CountingWLockBloomFilter<T, K>
     ///
     /// # Arguments
     ///
-    /// * `value` - the value to be hashed to create indices into the bloom filter.
-    /// These indices will be used to see if the element has been added.
+    /// * `value` - The value to be hashed to create indices into the bloom filter.
     ///
     /// # Examples
     /// ```
@@ -135,7 +134,7 @@ impl <T, K> CountingWLockBloomFilter<T, K>
     ///
     /// # Arguments
     ///
-    /// * `value` - the value to be hashed to create indices into the bloom filter.
+    /// * `value` - The value to be hashed to create indices into the bloom filter.
     /// These indices will be used to see if the element has been added.
     ///
     /// # Examples

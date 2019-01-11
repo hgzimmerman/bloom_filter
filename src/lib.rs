@@ -30,16 +30,18 @@ pub fn false_positive_rate(k: usize, n: usize, m: usize) -> f64 {
     (1.0 - E.powf(((0-k as isize)*n as isize) as f64/m as f64)).powi(k as i32)
 }
 
+/// Gets the required number of bits (`m`) if given 'k', 'n' and 'p'.
 pub fn m_from_knp(k: usize, n: usize, p: f64) -> usize {
     -((k * n) as f64 / (1f64 - p.powf(1.0/(k as f64) )).ln()) as usize
 }
 
-/// m = ceil((n * log(p)) / log(1 / pow(2, log(2))))
-pub fn needed_size(n: usize, p: f64) -> usize {
+/// Gets the required number of bits (`m`) assuming an optimal `k`, using `n` and `p`.
+pub fn optimal_m(n: usize, p: f64) -> usize {
+    // m = ceil((n * log(p)) / log(1 / pow(2, log(2))))
     ((n as f64 * p.ln()) / (1.0 / 2f64.powf(2f64.ln())).ln()).ceil() as usize
 }
 
-/// This gets the optimal k value assuming a given n and m.
+/// This gets the optimal k value given `n` and `m`.
 pub fn optimal_k(n: usize, m: usize) -> usize {
     ((m/n) as f64 * 2f64.ln()).ceil() as usize
 }
@@ -50,7 +52,7 @@ mod tests {
     use super::*;
     #[test]
     fn needed_size1() {
-        let m = needed_size(2000, 0.001);
+        let m = optimal_m(2000, 0.001);
         assert_eq!(m, 28756)
     }
 

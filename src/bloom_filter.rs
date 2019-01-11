@@ -48,7 +48,7 @@ impl <T, H> BloomFilter<T, ReHasher<H>> {
     /// let bf = BloomFilter::<&str, ReHasher<MurmurHasher>>::optimal_new(10000, 0.001);
     /// ```
     pub fn optimal_new(n: usize, p: f64)  -> Self {
-        let m = crate::needed_size(n, p);
+        let m = crate::optimal_m(n, p);
         let k = crate::optimal_k(n, m);
         BloomFilter {
             bit_vec: BitVec::from_elem(m, false),
@@ -138,8 +138,7 @@ impl <T, K> BloomFilter<T, K>
     ///
     /// # Arguments
     ///
-    /// * `value` - the value to be hashed to create indices into the bloom filter.
-    /// These indices will be used to see if the element has been added.
+    /// * `value` - The value to be hashed to create indices into the bloom filter.
     ///
     /// # Examples
     /// ```
@@ -164,7 +163,7 @@ impl <T, K> BloomFilter<T, K>
     ///
     /// # Arguments
     ///
-    /// * `value` - the value to be hashed to create indices into the bloom filter.
+    /// * `value` - The value to be hashed to create indices into the bloom filter.
     /// These indices will be used to see if the element has been added.
     ///
     /// # Examples
