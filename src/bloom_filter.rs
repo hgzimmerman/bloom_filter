@@ -39,8 +39,8 @@ impl <T, H> BloomFilter<T, ReHasher<H>> {
     ///
     /// # Examples
     /// ```
-    /// use crate::bloom_filter::BloomFilter;
-    /// use bloom_filter::rehasher::ReHasher;
+    /// use bloom_filter::BloomFilter;
+    /// use bloom_filter::ReHasher;
     /// use murmur3::murmur3_32::MurmurHasher;
     /// let bf = BloomFilter::<&str, ReHasher<MurmurHasher>>::optimal_new(10000, 0.001);
     /// ```
@@ -76,8 +76,8 @@ impl <T, H> BloomFilter<T, H> where H: HashToIndices + K {
     ///
     /// # Examples
     /// ```
-    /// use crate::bloom_filter::BloomFilter;
-    /// use bloom_filter::rehasher::ReHasher;
+    /// use bloom_filter::BloomFilter;
+    /// use bloom_filter::ReHasher;
     /// use murmur3::murmur3_32::MurmurHasher;
     /// let bf = BloomFilter::<&str, ReHasher<MurmurHasher>>::with_rate(10000, 0.001, ReHasher::new(1));
     /// ```
@@ -106,8 +106,8 @@ impl <T, K> BloomFilter<T, K>
     ///
     /// # Examples
     /// ```
-    /// use crate::bloom_filter::BloomFilter;
-    /// use bloom_filter::rehasher::ReHasher;
+    /// use bloom_filter::BloomFilter;
+    /// use bloom_filter::ReHasher;
     /// use murmur3::murmur3_32::MurmurHasher;
     /// let bf = BloomFilter::<&str, ReHasher<MurmurHasher>>::new(100000, ReHasher::new(1));
     /// ```
@@ -140,8 +140,8 @@ impl <T, K> BloomFilter<T, K>
     ///
     /// # Examples
     /// ```
-    /// use crate::bloom_filter::BloomFilter;
-    /// use bloom_filter::rehasher::ReHasher;
+    /// use bloom_filter::BloomFilter;
+    /// use bloom_filter::ReHasher;
     /// use murmur3::murmur3_32::MurmurHasher;
     /// let mut bf = BloomFilter::<&str, ReHasher<MurmurHasher>>::new(100000, ReHasher::new(1));
     /// bf.insert(&"hello");
@@ -166,8 +166,8 @@ impl <T, K> BloomFilter<T, K>
     ///
     /// # Examples
     /// ```
-    /// use crate::bloom_filter::BloomFilter;
-    /// use bloom_filter::rehasher::ReHasher;
+    /// use bloom_filter::BloomFilter;
+    /// use bloom_filter::ReHasher;
     /// use murmur3::murmur3_32::MurmurHasher;
     /// let mut bf = BloomFilter::<&str, ReHasher<MurmurHasher>>::new(100000, ReHasher::new(1));
     /// bf.insert(&"hello");

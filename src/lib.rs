@@ -13,6 +13,8 @@ pub mod counting_w_lock_bloom_filter;
 pub mod hash_to_indicies;
 
 pub use crate::bloom_filter::BloomFilter;
+pub use crate::counting_bloom_filter::CountingBloomFilter;
+pub use crate::rehasher::ReHasher;
 
 /// Calculates the ideal false positive rate.
 /// If the hashing functions that are used in a bloom filter produce a non-uniform distribution of hashes

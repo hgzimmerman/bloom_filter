@@ -6,16 +6,32 @@ use crate::rehasher::ReHasher;
 use crate::hash_to_indicies::K;
 
 
-/// A bloom filter that counts on each insertion so that it can give a reliable
+/// A bloom filter that counts on each insertion so that it can give a reliable estimate of
+/// a false positive rate at its current occupancy level.
 pub struct CountingBloomFilter<T,K>{
+    /// Backing bloom filter.
     bloom_filter: BloomFilter<T,K>,
+    /// The counter that keeps track of the number of elements inserted.
     count: usize
 }
 
 
 impl <T, H> CountingBloomFilter<T, ReHasher<H>> {
-    /// n: number of expected elements.
-    /// p: false positive rate desired at `n`.
+    /// Constructs a new BloomFilter with an optimal ratio of m and k,
+    /// derived from n and p inputs.
+    ///
+    /// # Arguments
+    ///
+    /// * `n` - Number of expected elements to be inserted into the set.
+    /// * `p` - False positive rate.
+    ///
+    /// # Examples
+    /// ```
+    /// use bloom_filter::BloomFilter;
+    /// use bloom_filter::ReHasher;
+    /// use murmur3::murmur3_32::MurmurHasher;
+    /// let bf = BloomFilter::<&str, ReHasher<MurmurHasher>>::optimal_new(10000, 0.001);
+    /// ```
     pub fn optimal_new(n: usize, p: f64)  -> Self {
         let bloom_filter = BloomFilter::optimal_new(n, p);
         CountingBloomFilter {
@@ -26,6 +42,30 @@ impl <T, H> CountingBloomFilter<T, ReHasher<H>> {
 }
 
 impl <T, H> CountingBloomFilter<T, H> where H: HashToIndices + GetK {
+    /// Given a fixed size `k`, and an expected number of elements (`n`),
+    /// initialize the bloom filter with a computed `m` value to achieve the required error rate.
+    ///
+    /// # Arguments
+    ///
+    /// * `n` - Number of expected elements to be inserted into the set.
+    /// * `p` - False positive rate.
+    /// * `hashers` - Hashing to indicies struct. `k` can be acquired from this.
+    ///
+    /// # Remarks
+    /// Because memory size may not be a premium, and hashing may be computationally expensive,
+    /// this function creates a BloomFilter with a fixed number of hashers,
+    /// while taking up more memory space than would otherwise be optimal.
+    ///
+    /// Because the insert and checking time scales with `k`, not with `m`,
+    /// `m` can be increased to trade space efficiency for speed.
+    ///
+    /// # Examples
+    /// ```
+    /// use bloom_filter::BloomFilter;
+    /// use bloom_filter::ReHasher;
+    /// use murmur3::murmur3_32::MurmurHasher;
+    /// let bf = BloomFilter::<&str, ReHasher<MurmurHasher>>::with_rate(10000, 0.001, ReHasher::new(1));
+    /// ```
     pub fn with_rate(expected_elements: usize, error_rate: f64, k: H) -> Self {
         CountingBloomFilter {
             bloom_filter: BloomFilter::with_rate(expected_elements, error_rate, k),
@@ -40,9 +80,21 @@ where
     K: HashToIndices + GetK
 {
     /// Creates the bloom filter with a given number of bits and with a multiple-hashing-to-index function.
-    pub fn new(num_bits: usize, k: K) -> Self {
+    ///
+    /// # Arguments
+    /// * `m` - Number of bits for the BloomFilter.
+    /// * `hashers` - Hashing to indices structure.
+    ///
+    /// # Examples
+    /// ```
+    /// use bloom_filter::BloomFilter;
+    /// use bloom_filter::ReHasher;
+    /// use murmur3::murmur3_32::MurmurHasher;
+    /// let bf = BloomFilter::<&str, ReHasher<MurmurHasher>>::new(100000, ReHasher::new(1));
+    /// ```
+    pub fn new(m: usize, hashers: K) -> Self {
         CountingBloomFilter {
-            bloom_filter: BloomFilter::new(num_bits, k),
+            bloom_filter: BloomFilter::new(m, hashers),
             count: 0
         }
     }
@@ -58,6 +110,21 @@ where
     /// This won't result in an actual false positive when `contains()` is called unless `k` is 1.
     /// A higher `k` value requires that `k` hash-indices need to collide for an actual false positive to occur.
     /// The drawback of a higher k is that it takes longer for each insert/lookup and that the filter will fill up faster.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - the value to be hashed to create indices into the bloom filter.
+    /// These indices will be used to see if the element has been added.
+    ///
+    /// # Examples
+    /// ```
+    /// use bloom_filter::CountingBloomFilter;
+    /// use bloom_filter::ReHasher;
+    /// use murmur3::murmur3_32::MurmurHasher;
+    /// let mut bf = CountingBloomFilter::<&str, ReHasher<MurmurHasher>>::new(100000, ReHasher::new(1));
+    /// bf.insert(&"hello");
+    /// bf.insert(&"there");
+    /// ```
     pub fn insert(&mut self, value: &T) {
         self.count += 1;
         self.bloom_filter.insert(value)
@@ -68,6 +135,24 @@ where
     /// Likelihood of false positives will increase as the filter fills up.
     /// This can be mitigated by allocating more bits to the bloom filter, and by increasing the number of hash functions used ('k').
     ///
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - the value to be hashed to create indices into the bloom filter.
+    /// These indices will be used to see if the element has been added.
+    ///
+    /// # Examples
+    /// ```
+    /// use bloom_filter::CountingBloomFilter;
+    /// use bloom_filter::ReHasher;
+    /// use murmur3::murmur3_32::MurmurHasher;
+    /// let mut bf = CountingBloomFilter::<&str, ReHasher<MurmurHasher>>::new(100000, ReHasher::new(1));
+    /// bf.insert(&"hello");
+    /// bf.insert(&"there");
+    /// assert!(bf.contains(&"hello"));
+    /// assert!(bf.contains(&"there"));
+    /// assert!(!bf.contains(&"not here"));
+    /// ```
     pub fn contains(&self, value: &T) -> bool {
         self.bloom_filter.contains(value)
     }
