@@ -69,10 +69,4 @@ mod tests {
         let m = m_from_knp(4, 1000, p);
         assert_eq!(m, 10000)
     }
-
-    #[test]
-    fn aoeuaoeu() {
-
-    }
-
 }
