@@ -154,7 +154,22 @@ impl <T, K> CountingWLockBloomFilter<T, K>
         self.bloom_filter.contains(value)
     }
 
-    /// Returns an estimate of the current chance that any given lookup will return a false positive.
+    /// Returns the current chance that any given lookup will return a false positive.
+    ///
+    /// # Note
+    /// The accuracy of the false positive chance is correlated with how evenly distributed the chosen hashing method is.
+    /// As it stands, most users will choose a fast hashing method that may not necessarily have a perfectly distributed hash output.
+    /// Because of this, the actual incidence of false positives may be higher than indicated here.
+    ///
+    /// # Examples
+    /// ```
+    /// use bloom_filter::CountingWLockBloomFilter;
+    /// use bloom_filter::ReHasher;
+    /// use murmur3::murmur3_32::MurmurHasher;
+    /// let bf = CountingWLockBloomFilter::<&str, ReHasher<MurmurHasher>>::new(100, ReHasher::new(1));
+    /// assert_eq!(bf.false_positive_chance(), 0.0);
+    /// bf.insert(&"hello");
+    /// assert_eq!(bf.false_positive_chance(), 0.009950166250831893 );
     pub fn false_positive_chance(&self) -> f64 {
         use crate::false_positive_rate as fpr;
         fpr(self.bloom_filter.k.k(), self.count.load(Ordering::Relaxed), self.bloom_filter.num_bits())

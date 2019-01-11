@@ -14,8 +14,11 @@ use crate::hash_to_indicies::K;
 /// This false positive rate is influenced by the number of hash functions used and the size of the backing bit vector,
 /// as well as the number of entries that have been recorded.
 pub struct BloomFilter<T, K>{
+    /// The backing bit vector.
     pub(crate) bit_vec: BitVec,
+    /// The type information of what the bitvector will accept as input.
     type_info: PhantomData<T>,
+    /// The generic hashing structure.
     pub(crate) k:  Box<K>
 }
 
