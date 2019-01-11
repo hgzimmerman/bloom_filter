@@ -31,6 +31,10 @@ pub fn false_positive_rate(k: usize, n: usize, m: usize) -> f64 {
 }
 
 /// Gets the required number of bits (`m`) if given 'k', 'n' and 'p'.
+///
+/// # Note
+/// This is useful if you want to choose `k` beforehand for performance reasons,
+/// and you want to know how big the bloom filter will need to be to achieve a desired false positive rate.
 pub fn m_from_knp(k: usize, n: usize, p: f64) -> usize {
     -((k * n) as f64 / (1f64 - p.powf(1.0/(k as f64) )).ln()) as usize
 }
