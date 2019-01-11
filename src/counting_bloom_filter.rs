@@ -27,10 +27,10 @@ impl <T, H> CountingBloomFilter<T, ReHasher<H>> {
     ///
     /// # Examples
     /// ```
-    /// use bloom_filter::BloomFilter;
+    /// use bloom_filter::CountingBloomFilter;
     /// use bloom_filter::ReHasher;
     /// use murmur3::murmur3_32::MurmurHasher;
-    /// let bf = BloomFilter::<&str, ReHasher<MurmurHasher>>::optimal_new(10000, 0.001);
+    /// let bf = CountingBloomFilter::<&str, ReHasher<MurmurHasher>>::optimal_new(10000, 0.001);
     /// ```
     pub fn optimal_new(n: usize, p: f64)  -> Self {
         let bloom_filter = BloomFilter::optimal_new(n, p);
@@ -61,10 +61,10 @@ impl <T, H> CountingBloomFilter<T, H> where H: HashToIndices + GetK {
     ///
     /// # Examples
     /// ```
-    /// use bloom_filter::BloomFilter;
+    /// use bloom_filter::CountingBloomFilter;
     /// use bloom_filter::ReHasher;
     /// use murmur3::murmur3_32::MurmurHasher;
-    /// let bf = BloomFilter::<&str, ReHasher<MurmurHasher>>::with_rate(10000, 0.001, ReHasher::new(1));
+    /// let bf = CountingBloomFilter::<&str, ReHasher<MurmurHasher>>::with_rate(10000, 0.001, ReHasher::new(1));
     /// ```
     pub fn with_rate(expected_elements: usize, error_rate: f64, k: H) -> Self {
         CountingBloomFilter {
@@ -87,10 +87,10 @@ where
     ///
     /// # Examples
     /// ```
-    /// use bloom_filter::BloomFilter;
+    /// use bloom_filter::CountingBloomFilter;
     /// use bloom_filter::ReHasher;
     /// use murmur3::murmur3_32::MurmurHasher;
-    /// let bf = BloomFilter::<&str, ReHasher<MurmurHasher>>::new(100000, ReHasher::new(1));
+    /// let bf = CountingBloomFilter::<&str, ReHasher<MurmurHasher>>::new(100000, ReHasher::new(1));
     /// ```
     pub fn new(m: usize, hashers: K) -> Self {
         CountingBloomFilter {

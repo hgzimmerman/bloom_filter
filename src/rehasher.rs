@@ -8,12 +8,16 @@ use std::hash::BuildHasher;
 /// A struct when made to hash a value to indices into the bloom filter,
 /// will reuse the same hashbuffer multiple times,
 /// seeding the each iteration with the last's buffer state.
-pub struct ReHasher<T>{
+pub struct ReHasher<T> {
     k: usize,
     hasher: BuildHasherDefault<T>
 }
 impl <T> ReHasher<T> {
-    pub fn new(k:usize) -> Self {
+    /// Creates a new ReHasher
+    ///
+    /// # Arguments
+    /// * `k` - The number of times the hashing function will run.
+    pub fn new(k: usize) -> Self {
         ReHasher {
             k,
             hasher: BuildHasherDefault::default()
