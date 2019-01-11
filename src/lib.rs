@@ -1,3 +1,9 @@
+//! Bloom filters offer time and space efficient lookup with no false negatives,
+//! and with a false positive rate dependent on the number of hashers (`k`), number of entries (`n`),
+//! and number of bits in the filter (`m`).
+//! The false positive rate will increase as `n` rises, and will fall as `k` and `m` rise.
+
+
 pub mod bloom_filter;
 pub mod w_lock_bloom_filter;
 pub mod hash_numbers;
