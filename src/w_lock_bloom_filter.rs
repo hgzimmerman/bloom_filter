@@ -127,10 +127,10 @@ impl <T, K> WLockBloomFilter<T, K>
     ///
     /// # Examples
     /// ```
-    /// use bloom_filter::BloomFilter;
+    /// use bloom_filter::WLockBloomFilter;
     /// use bloom_filter::ReHasher;
     /// use murmur3::murmur3_32::MurmurHasher;
-    /// let bf = BloomFilter::<&str, ReHasher<MurmurHasher>>::new(100000, ReHasher::new(1));
+    /// let bf = WLockBloomFilter::<&str, ReHasher<MurmurHasher>>::new(100000, ReHasher::new(1));
     /// ```
     pub fn new(num_bits: usize, k: K) -> Self {
         WLockBloomFilter {
