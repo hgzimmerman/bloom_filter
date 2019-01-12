@@ -49,7 +49,7 @@ impl<T, K> Debug for WLockBloomFilter<T, K> {
                 .iter()
                 .for_each(|b| if b { s.push('1') } else { s.push('0') })
         }
-        write!(f, "bit_vec: [{}]", s)
+        write!(f, "bloom_filter: [{}]", s)
     }
 }
 
