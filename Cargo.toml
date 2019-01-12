@@ -5,6 +5,10 @@ authors = ["Henry Zimmerman <zimhen7@gmail.com>"]
 edition = "2018"
 license = "MIT"
 
+[features]
+std = []
+default = ["std"]
+
 [dependencies]
 bit-vec = "0.5.0"
 

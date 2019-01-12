@@ -2,11 +2,11 @@ use crate::hash_to_indicies::HashToIndices;
 use crate::hash_to_indicies::K;
 use crate::rehasher::ReHasher;
 use bit_vec::BitVec;
-use std::fmt::Debug;
-use std::fmt::Error;
-use std::fmt::Formatter;
-use std::hash::Hash;
-use std::marker::PhantomData;
+use core::fmt::Debug;
+use core::fmt::Error;
+use core::fmt::Formatter;
+use core::hash::Hash;
+use core::marker::PhantomData;
 
 /// A probabilistic datastructure that can quickly tell with complete accuracy if an element has _not_ been
 /// added to itself, but allows false positives when determining if an element has been added.

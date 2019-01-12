@@ -2,13 +2,13 @@ use crate::hash_to_indicies::HashToIndices;
 use crate::hash_to_indicies::K;
 use crate::rehasher::ReHasher;
 use bit_vec::BitVec;
-use std::fmt::Debug;
-use std::fmt::Error;
-use std::fmt::Formatter;
-use std::hash::Hash;
-use std::marker::PhantomData;
-use std::sync::atomic::AtomicBool;
-use std::sync::atomic::Ordering;
+use core::fmt::Debug;
+use core::fmt::Error;
+use core::fmt::Formatter;
+use core::hash::Hash;
+use core::marker::PhantomData;
+use core::sync::atomic::AtomicBool;
+use core::sync::atomic::Ordering;
 
 /// A variant of a bloom filter with the insert method taking &self, so no mutable reference to the
 /// datastructure is needed.
@@ -190,6 +190,7 @@ where
             .is_writing
             .compare_and_swap(false, true, Ordering::Acquire)
         {
+            #[cfg(std)]
             std::thread::yield_now() // TODO check if this is faster or slower than just spinning. do for various thread counts.
         }
         indices

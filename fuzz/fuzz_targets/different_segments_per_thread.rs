@@ -29,7 +29,7 @@ fuzz_target!(|data: &[u8]| {
 
     let v: Vec<&str> = data
         .chunks(chunk_size)
-        .map(std::str::from_utf8)
+        .map(core::str::from_utf8)
         .filter_map(|x| x.ok())
         .map(|segment| {
             normal_bloom_filter.insert(&segment);

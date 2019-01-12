@@ -1,4 +1,4 @@
-use std::hash::Hash;
+use core::hash::Hash;
 
 pub trait HashToIndices: Default {
     /// When called, will return a vector of indices.

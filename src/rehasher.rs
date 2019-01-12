@@ -1,9 +1,9 @@
 use crate::hash_to_indicies::HashToIndices;
 use crate::hash_to_indicies::K;
-use std::hash::BuildHasher;
-use std::hash::BuildHasherDefault;
-use std::hash::Hash;
-use std::hash::Hasher;
+use core::hash::BuildHasher;
+use core::hash::BuildHasherDefault;
+use core::hash::Hash;
+use core::hash::Hasher;
 
 /// A struct when made to hash a value to indices into the bloom filter,
 /// will reuse the same hashbuffer multiple times,

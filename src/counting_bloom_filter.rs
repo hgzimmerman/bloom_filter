@@ -3,7 +3,7 @@ use crate::hash_to_indicies::HashToIndices;
 use crate::hash_to_indicies::K as GetK;
 use crate::hash_to_indicies::K;
 use crate::rehasher::ReHasher;
-use std::hash::Hash;
+use core::hash::Hash;
 
 /// A bloom filter that counts on each insertion so that it can give a reliable estimate of
 /// a false positive rate at its current occupancy level.

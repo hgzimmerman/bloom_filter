@@ -3,9 +3,9 @@ use crate::hash_to_indicies::K as GetK;
 use crate::hash_to_indicies::K;
 use crate::rehasher::ReHasher;
 use crate::w_lock_bloom_filter::WLockBloomFilter;
-use std::hash::Hash;
-use std::sync::atomic::AtomicUsize;
-use std::sync::atomic::Ordering;
+use core::hash::Hash;
+use core::sync::atomic::AtomicUsize;
+use core::sync::atomic::Ordering;
 
 /// A bloom filter with a spinlock permitting writes and an atomic counter to allow
 /// assessing the percentage chance of a false positive.

@@ -1,9 +1,9 @@
 use crate::hash_to_indicies::HashToIndices;
 use crate::hash_to_indicies::K;
-use std::hash::BuildHasher;
-use std::hash::BuildHasherDefault;
-use std::hash::Hash;
-use std::hash::Hasher;
+use core::hash::BuildHasher;
+use core::hash::BuildHasherDefault;
+use core::hash::Hash;
+use core::hash::Hasher;
 
 // TODO: this file may be better implemented using a macro.
 

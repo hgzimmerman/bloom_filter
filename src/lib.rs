@@ -1,4 +1,8 @@
 #![feature(test)]
+
+#![cfg_attr(not(feature = "std"), no_core)]
+
+
 //! Bloom filters offer time and space efficient lookup with no false negatives,
 //! and with a false positive rate dependent on the number of hashers (`k`), number of entries (`n`),
 //! and number of bits in the filter (`m`).
@@ -29,7 +33,7 @@ pub use crate::rehasher::ReHasher;
 /// n: number of elements
 /// m: number of bits
 pub fn false_positive_rate(k: usize, n: usize, m: usize) -> f64 {
-    use std::f64::consts::E;
+    use core::f64::consts::E;
     (1.0 - E.powf(((0 - k as isize) * n as isize) as f64 / m as f64)).powi(k as i32)
 }
 
@@ -427,7 +431,7 @@ mod benches {
 
             #[bench]
             fn k4_get(b: &mut Bencher) {
-                let mut bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                let bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
                 b.iter(|| {
                     bf.contains(&0);
                 })
@@ -435,7 +439,7 @@ mod benches {
 
             #[bench]
             fn k7_get(b: &mut Bencher) {
-                let mut bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(7));
+                let bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(7));
                 b.iter(|| {
                     bf.contains(&0);
                 })
@@ -479,7 +483,7 @@ mod benches {
 
             #[bench]
             fn k1_get(b: &mut Bencher) {
-                let mut bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
+                let bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
                 b.iter(|| {
                     bf.contains(&0);
                 })
@@ -487,7 +491,7 @@ mod benches {
 
             #[bench]
             fn k4_get(b: &mut Bencher) {
-                let mut bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                let bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
                 b.iter(|| {
                     bf.contains(&0);
                 })
@@ -495,7 +499,7 @@ mod benches {
 
             #[bench]
             fn k7_get(b: &mut Bencher) {
-                let mut bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(7));
+                let bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(7));
                 b.iter(|| {
                     bf.contains(&0);
                 })
