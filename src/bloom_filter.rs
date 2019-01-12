@@ -40,6 +40,10 @@ impl<T, H> BloomFilter<T, ReHasher<H>> {
     /// * `n` - Number of expected elements to be inserted into the set.
     /// * `p` - False positive rate.
     ///
+    /// # Notes
+    /// For practical use, optimal isn't really optimal with respect to the speed of the bloom filter.
+    /// Manually choosing a lower `k` typically results in up to a 3x speedup.
+    ///
     /// # Examples
     /// ```
     /// use bloom_filter::BloomFilter;

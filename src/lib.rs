@@ -1,7 +1,10 @@
+#![feature(test)]
 //! Bloom filters offer time and space efficient lookup with no false negatives,
 //! and with a false positive rate dependent on the number of hashers (`k`), number of entries (`n`),
 //! and number of bits in the filter (`m`).
 //! The false positive rate will increase as `n` rises, and will fall as `k` and `m` rise.
+
+extern crate test;
 
 pub mod bloom_filter;
 pub mod counting_bloom_filter;
@@ -72,4 +75,554 @@ mod tests {
         let m = m_from_knp(4, 1000, p);
         assert_eq!(m, 10000)
     }
+}
+
+#[cfg(test)]
+mod benches {
+    use super::*;
+    use test::Bencher;
+    use murmur3::murmur3_32::MurmurHasher;
+    mod thousand_elements {
+        use super::*;
+        mod normal {
+            use super::*;
+
+            #[bench]
+            fn optimal_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let mut bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::optimal_new(1000, 0.001);
+                    (0..1000)
+                        .for_each(|n| bf.insert(&n));
+                })
+            }
+
+            #[bench]
+            fn k7_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let mut bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                    (0..1000)
+                        .for_each(|n| bf.insert(&n));
+                })
+            }
+
+            #[bench]
+            fn k4_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let mut bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                    (0..1000)
+                        .for_each(|n| bf.insert(&n));
+                })
+            }
+
+            #[bench]
+            fn k1_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let mut bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
+                    (0..1000)
+                        .for_each(|n| bf.insert(&n));
+                })
+            }
+
+            #[bench]
+            fn k1_get(b: &mut Bencher) {
+                let mut bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
+                (0..1000)
+                    .for_each(|n| bf.insert(&n));
+                b.iter(|| {
+                    (0..1000)
+                        .for_each(|n| { bf.contains(&n); });
+                })
+            }
+
+            #[bench]
+            fn k4_get(b: &mut Bencher) {
+                let mut bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                (0..1000)
+                    .for_each(|n| bf.insert(&n));
+                b.iter(|| {
+                    (0..1000)
+                        .for_each(|n| { bf.contains(&n); });
+                })
+            }
+
+            #[bench]
+            fn k7_get(b: &mut Bencher) {
+                let mut bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(7));
+                (0..1000)
+                    .for_each(|n| bf.insert(&n));
+                b.iter(|| {
+                    (0..1000)
+                        .for_each(|n| { bf.contains(&n); });
+                })
+            }
+        }
+
+        mod counting {
+            use super::*;
+
+            #[bench]
+            fn optimal_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let mut bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::optimal_new(1000, 0.001);
+                    (0..1000)
+                        .for_each(|n| bf.insert(&n));
+                })
+            }
+
+            #[bench]
+            fn k7_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let mut bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                    (0..1000)
+                        .for_each(|n| bf.insert(&n));
+                })
+            }
+
+            #[bench]
+            fn k4_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let mut bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                    (0..1000)
+                        .for_each(|n| bf.insert(&n));
+                })
+            }
+
+            #[bench]
+            fn k1_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let mut bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
+                    (0..1000)
+                        .for_each(|n| bf.insert(&n));
+                })
+            }
+
+            #[bench]
+            fn k1_get(b: &mut Bencher) {
+                let mut bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
+                (0..1000)
+                    .for_each(|n| bf.insert(&n));
+                b.iter(|| {
+                    (0..1000)
+                        .for_each(|n| { bf.contains(&n); });
+                })
+            }
+
+            #[bench]
+            fn k4_get(b: &mut Bencher) {
+                let mut bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                (0..1000)
+                    .for_each(|n| bf.insert(&n));
+                b.iter(|| {
+                    (0..1000)
+                        .for_each(|n| { bf.contains(&n); });
+                })
+            }
+
+            #[bench]
+            fn k7_get(b: &mut Bencher) {
+                let mut bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(7));
+                (0..1000)
+                    .for_each(|n| bf.insert(&n));
+                b.iter(|| {
+                    (0..1000)
+                        .for_each(|n| { bf.contains(&n); });
+                })
+            }
+        }
+
+
+        mod wl {
+            use super::*;
+
+            #[bench]
+            fn optimal_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let bf = WLockBloomFilter::<i32, ReHasher<MurmurHasher>>::optimal_new(1000, 0.001);
+                    (0..1000)
+                        .for_each(|n| bf.insert(&n));
+                })
+            }
+
+            #[bench]
+            fn k7_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let bf = WLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                    (0..1000)
+                        .for_each(|n| bf.insert(&n));
+                })
+            }
+
+            #[bench]
+            fn k4_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let bf = WLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                    (0..1000)
+                        .for_each(|n| bf.insert(&n));
+                })
+            }
+
+            #[bench]
+            fn k1_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let bf = WLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
+                    (0..1000)
+                        .for_each(|n| bf.insert(&n));
+                })
+            }
+
+            #[bench]
+            fn k1_get(b: &mut Bencher) {
+                let bf = WLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
+                (0..1000)
+                    .for_each(|n| bf.insert(&n));
+                b.iter(|| {
+                    (0..1000)
+                        .for_each(|n| assert!(bf.contains(&n)));
+                })
+            }
+
+            #[bench]
+            fn k4_get(b: &mut Bencher) {
+                let bf = WLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                (0..1000)
+                    .for_each(|n| bf.insert(&n));
+                b.iter(|| {
+                    (0..1000)
+                        .for_each(|n| { bf.contains(&n); });
+                })
+            }
+
+            #[bench]
+            fn k7_get(b: &mut Bencher) {
+                let bf = WLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(7));
+                (0..1000)
+                    .for_each(|n| bf.insert(&n));
+                b.iter(|| {
+                    (0..1000)
+                        .for_each(|n| { bf.contains(&n); });
+                })
+            }
+        }
+
+        mod counting_wl {
+            use super::*;
+
+            #[bench]
+            fn optimal_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let bf = CountingWLockBloomFilter::<i32, ReHasher<MurmurHasher>>::optimal_new(1000, 0.001);
+                    (0..1000)
+                        .for_each(|n| bf.insert(&n));
+                })
+            }
+
+            #[bench]
+            fn k7_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let bf = CountingWLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                    (0..1000)
+                        .for_each(|n| bf.insert(&n));
+                })
+            }
+
+            #[bench]
+            fn k4_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let bf = CountingWLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                    (0..1000)
+                        .for_each(|n| bf.insert(&n));
+                })
+            }
+
+            #[bench]
+            fn k1_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let bf = CountingWLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
+                    (0..1000)
+                        .for_each(|n| bf.insert(&n));
+                })
+            }
+
+            #[bench]
+            fn k1_get(b: &mut Bencher) {
+                let bf = CountingWLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
+                (0..1000)
+                    .for_each(|n| bf.insert(&n));
+                b.iter(|| {
+                    (0..1000)
+                        .for_each(|n| assert!(bf.contains(&n)));
+                })
+            }
+
+            #[bench]
+            fn k4_get(b: &mut Bencher) {
+                let bf = CountingWLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                (0..1000)
+                    .for_each(|n| bf.insert(&n));
+                b.iter(|| {
+                    (0..1000)
+                        .for_each(|n| { bf.contains(&n); });
+                })
+            }
+
+            #[bench]
+            fn k7_get(b: &mut Bencher) {
+                let bf = CountingWLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(7));
+                (0..1000)
+                    .for_each(|n| bf.insert(&n));
+                b.iter(|| {
+                    (0..1000)
+                        .for_each(|n| { bf.contains(&n); });
+                })
+            }
+        }
+    }
+    
+    
+    mod single_element {
+        use super::*;
+
+        mod normal {
+            use super::*;
+
+            #[bench]
+            fn optimal_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let mut bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::optimal_new(1000, 0.001);
+                    bf.insert(&0);
+                })
+            }
+
+            #[bench]
+            fn k7_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let mut bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                    bf.insert(&0);
+                })
+            }
+
+            #[bench]
+            fn k4_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let mut bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                    bf.insert(&0);
+                })
+            }
+
+            #[bench]
+            fn k1_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let mut bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
+                    bf.insert(&0);
+                })
+            }
+
+            #[bench]
+            fn k1_get(b: &mut Bencher) {
+                let mut bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
+                b.iter(|| {
+                    bf.contains(&0);
+                })
+            }
+
+            #[bench]
+            fn k4_get(b: &mut Bencher) {
+                let mut bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                b.iter(|| {
+                    bf.contains(&0);
+                })
+            }
+
+            #[bench]
+            fn k7_get(b: &mut Bencher) {
+                let mut bf = BloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(7));
+                b.iter(|| {
+                    bf.contains(&0);
+                })
+            }
+        }
+
+        mod counting {
+            use super::*;
+
+            #[bench]
+            fn optimal_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let mut bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::optimal_new(1000, 0.001);
+                    bf.insert(&0);
+                })
+            }
+
+            #[bench]
+            fn k7_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let mut bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                    bf.insert(&0);
+                })
+            }
+
+            #[bench]
+            fn k4_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let mut bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                    bf.insert(&0);
+                })
+            }
+
+            #[bench]
+            fn k1_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let mut bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
+                    bf.insert(&0);
+                })
+            }
+
+            #[bench]
+            fn k1_get(b: &mut Bencher) {
+                let mut bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
+                b.iter(|| {
+                    bf.contains(&0);
+                })
+            }
+
+            #[bench]
+            fn k4_get(b: &mut Bencher) {
+                let mut bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                b.iter(|| {
+                    bf.contains(&0);
+                })
+            }
+
+            #[bench]
+            fn k7_get(b: &mut Bencher) {
+                let mut bf = CountingBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(7));
+                b.iter(|| {
+                    bf.contains(&0);
+                })
+            }
+        }
+
+
+        mod wl {
+            use super::*;
+
+            #[bench]
+            fn optimal_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let bf = WLockBloomFilter::<i32, ReHasher<MurmurHasher>>::optimal_new(1000, 0.001);
+                    bf.insert(&0);
+                })
+            }
+
+            #[bench]
+            fn k7_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let bf = WLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                    bf.insert(&0);
+                })
+            }
+
+            #[bench]
+            fn k4_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let bf = WLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                    bf.insert(&0);
+                })
+            }
+
+            #[bench]
+            fn k1_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let bf = WLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
+                    bf.insert(&0);
+                })
+            }
+
+            #[bench]
+            fn k1_get(b: &mut Bencher) {
+                let bf = WLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
+                b.iter(|| {
+                    bf.contains(&0)
+                })
+            }
+
+            #[bench]
+            fn k4_get(b: &mut Bencher) {
+                let bf = WLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                b.iter(|| {
+                    bf.contains(&0);
+                })
+            }
+
+            #[bench]
+            fn k7_get(b: &mut Bencher) {
+                let bf = WLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(7));
+                b.iter(|| {
+                    bf.contains(&0);
+                })
+            }
+        }
+
+        mod counting_wl {
+            use super::*;
+
+            #[bench]
+            fn optimal_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let bf = CountingWLockBloomFilter::<i32, ReHasher<MurmurHasher>>::optimal_new(1000, 0.001);
+                    bf.insert(&0);
+                })
+            }
+
+            #[bench]
+            fn k7_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let bf = CountingWLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                    bf.insert(&0);
+                })
+            }
+
+            #[bench]
+            fn k4_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let bf = CountingWLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                    bf.insert(&0);
+                })
+            }
+
+            #[bench]
+            fn k1_insert(b: &mut Bencher) {
+                b.iter(|| {
+                    let bf = CountingWLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
+                    bf.insert(&0);
+                })
+            }
+
+            #[bench]
+            fn k1_get(b: &mut Bencher) {
+                let bf = CountingWLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(1));
+                b.iter(|| {
+                    bf.contains(&0);
+                })
+            }
+
+            #[bench]
+            fn k4_get(b: &mut Bencher) {
+                let bf = CountingWLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(4));
+                b.iter(|| {
+                    bf.contains(&0);
+                })
+            }
+
+            #[bench]
+            fn k7_get(b: &mut Bencher) {
+                let bf = CountingWLockBloomFilter::<i32, ReHasher<MurmurHasher>>::with_rate(1000, 0.001, ReHasher::new(7));
+                b.iter(|| {
+                    bf.contains(&0);
+                })
+            }
+        }
+    }
+
+
 }
