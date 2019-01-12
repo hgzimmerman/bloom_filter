@@ -5,6 +5,8 @@ use std::hash::BuildHasherDefault;
 use std::hash::Hash;
 use std::hash::Hasher;
 
+// TODO: this file may be better implemented using a macro.
+
 #[derive(Default, Debug)]
 pub struct One<H>(BuildHasherDefault<H>);
 #[derive(Default, Debug)]

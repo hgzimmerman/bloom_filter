@@ -30,7 +30,7 @@ pub fn false_positive_rate(k: usize, n: usize, m: usize) -> f64 {
     (1.0 - E.powf(((0 - k as isize) * n as isize) as f64 / m as f64)).powi(k as i32)
 }
 
-/// Gets the required number of bits (`m`) if given 'k', 'n' and 'p'.
+/// Gets the required number of bits (`m`) if given `k`, `n` and `p`.
 ///
 /// # Note
 /// This is useful if you want to choose `k` beforehand for performance reasons,
@@ -45,7 +45,7 @@ pub fn optimal_m(n: usize, p: f64) -> usize {
     ((n as f64 * p.ln()) / (1.0 / 2f64.powf(2f64.ln())).ln()).ceil() as usize
 }
 
-/// This gets the optimal k value given `n` and `m`.
+/// This gets the optimal number of hashes to perform (`k`) given `n` and `m`.
 pub fn optimal_k(n: usize, m: usize) -> usize {
     ((m / n) as f64 * 2f64.ln()).ceil() as usize
 }

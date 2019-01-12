@@ -10,14 +10,19 @@ use std::marker::PhantomData;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 
-/// A variant of a bloom filter with the insert method taking &self, so no mutable reference to the datastructure is needed.
-/// This should be thread safe because:
-/// 1. The size of the backing bitvec is fixed size, and nothing takes any references to it anyway, so the concern about growing+reallocating does not exist.
+/// A variant of a bloom filter with the insert method taking &self, so no mutable reference to the
+/// datastructure is needed.
+///
+/// # Notes
+/// This is thread safe because:
+/// 1. The size of the backing bitvec is fixed size, and nothing takes any references to it anyway,
+/// so the concern about growing+reallocating does not exist.
 /// 2. The k values are immutable and act as factories for producing default hashers.
 /// If they don't produce hashers in the same state on every invocation, the implementation is broken anyway.
 /// 3. Because there is a spinlock on the critical section of the insert operation,
 /// no two threads can race and clobber the setting of bits.
 ///
+/// # Warning
 /// Do note, that this is a write only lock.
 /// That means that if one thread is reading and another is writing,
 /// there is no guarantee that the write will finish before the read occurs assuming the
