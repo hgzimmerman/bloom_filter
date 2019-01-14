@@ -1,6 +1,6 @@
 #![feature(test)]
 
-#![cfg_attr(not(feature = "std"), no_core)]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 
 //! Bloom filters offer time and space efficient lookup with no false negatives,

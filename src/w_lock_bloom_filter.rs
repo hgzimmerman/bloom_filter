@@ -2,9 +2,6 @@ use crate::hash_to_indicies::HashToIndices;
 use crate::hash_to_indicies::K;
 use crate::rehasher::ReHasher;
 use bit_vec::BitVec;
-use core::fmt::Debug;
-use core::fmt::Error;
-use core::fmt::Formatter;
 use core::hash::Hash;
 use core::marker::PhantomData;
 use core::sync::atomic::AtomicBool;
@@ -33,7 +30,7 @@ use core::sync::atomic::Ordering;
 /// If guaranteed absolute ordering is needed, a RwLock<BloomFilter> could be used instead,
 /// although that comes with a significant performance cost because the lock would persist
 /// while the hashing takes place, which is where the majority of time is spent.
-///
+#[derive(Debug, Clone)]
 pub struct WLockBloomFilter<T, K> {
     pub(crate) bit_vec: *mut BitVec,
     is_writing: AtomicBool,
@@ -41,17 +38,6 @@ pub struct WLockBloomFilter<T, K> {
     pub(crate) k: K,
 }
 
-impl<T, K> Debug for WLockBloomFilter<T, K> {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        let mut s = String::new();
-        unsafe {
-            (*self.bit_vec)
-                .iter()
-                .for_each(|b| if b { s.push('1') } else { s.push('0') })
-        }
-        write!(f, "bloom_filter: [{}]", s)
-    }
-}
 
 unsafe impl<T, K> Send for WLockBloomFilter<T, K>
 where

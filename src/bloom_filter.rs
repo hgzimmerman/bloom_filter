@@ -2,9 +2,8 @@ use crate::hash_to_indicies::HashToIndices;
 use crate::hash_to_indicies::K;
 use crate::rehasher::ReHasher;
 use bit_vec::BitVec;
-use core::fmt::Debug;
-use core::fmt::Error;
-use core::fmt::Formatter;
+//use core::fmt::Error;
+//use core::fmt::Formatter;
 use core::hash::Hash;
 use core::marker::PhantomData;
 
@@ -12,6 +11,7 @@ use core::marker::PhantomData;
 /// added to itself, but allows false positives when determining if an element has been added.
 /// This false positive rate is influenced by the number of hash functions used and the size of the backing bit vector,
 /// as well as the number of entries that have been recorded.
+#[derive(Debug, Clone)]
 pub struct BloomFilter<T, K> {
     /// The backing bit vector.
     pub(crate) bit_vec: BitVec,
@@ -21,15 +21,17 @@ pub struct BloomFilter<T, K> {
     pub(crate) k: K,
 }
 
-impl<T, K> Debug for BloomFilter<T, K> {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        let mut s = String::new();
-        self.bit_vec
-            .iter()
-            .for_each(|b| if b { s.push('1') } else { s.push('0') });
-        write!(f, "bit_vec: [{}]", s)
-    }
-}
+//impl<T, K> Debug for BloomFilter<T, K> {
+//    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+//        let s: &[u8] = self.bit_vec
+//            .iter()
+//            .map(|b| if b { b'1' } else { b'0' })
+//            .collect();
+//        let s = core::str::from_utf8(&s).unwrap();
+//
+//        write!(f, "bit_vec: [{}]", s)
+//    }
+//}
 
 impl<T, H> BloomFilter<T, ReHasher<H>> {
     /// Constructs a new BloomFilter with an optimal ratio of m and k,
