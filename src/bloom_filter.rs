@@ -18,7 +18,7 @@ pub struct BloomFilter<T, K> {
     /// The type information of what the bitvector will accept as input.
     type_info: PhantomData<T>,
     /// The generic hashing structure.
-    pub(crate) k: Box<K>,
+    pub(crate) k: K,
 }
 
 impl<T, K> Debug for BloomFilter<T, K> {
@@ -57,7 +57,7 @@ impl<T, H> BloomFilter<T, ReHasher<H>> {
         BloomFilter {
             bit_vec: BitVec::from_elem(m, false),
             type_info: PhantomData,
-            k: Box::new(ReHasher::new(k)),
+            k: ReHasher::new(k),
         }
     }
 }
@@ -95,7 +95,7 @@ where
         BloomFilter {
             bit_vec: BitVec::from_elem(m, false),
             type_info: PhantomData,
-            k: Box::new(hashers),
+            k: hashers,
         }
     }
 }
@@ -123,7 +123,7 @@ where
         BloomFilter {
             bit_vec: BitVec::from_elem(m, false),
             type_info: PhantomData,
-            k: Box::new(hashers),
+            k: hashers,
         }
     }
 

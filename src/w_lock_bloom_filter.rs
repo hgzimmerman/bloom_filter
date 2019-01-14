@@ -38,7 +38,7 @@ pub struct WLockBloomFilter<T, K> {
     pub(crate) bit_vec: *mut BitVec,
     is_writing: AtomicBool,
     type_info: PhantomData<T>,
-    pub(crate) k: Box<K>,
+    pub(crate) k: K,
 }
 
 impl<T, K> Debug for WLockBloomFilter<T, K> {
@@ -89,7 +89,7 @@ impl<T, H> WLockBloomFilter<T, ReHasher<H>> {
             bit_vec: Box::into_raw(Box::new(BitVec::from_elem(m, false))),
             is_writing: AtomicBool::new(false),
             type_info: PhantomData,
-            k: Box::new(ReHasher::new(k)),
+            k: ReHasher::new(k),
         }
     }
 }
@@ -128,7 +128,7 @@ where
             bit_vec: Box::into_raw(Box::new(BitVec::from_elem(m, false))),
             is_writing: AtomicBool::new(false),
             type_info: PhantomData,
-            k: Box::new(hashers),
+            k: hashers,
         }
     }
 }
@@ -156,7 +156,7 @@ where
             bit_vec: Box::into_raw(Box::new(BitVec::from_elem(m, false))),
             is_writing: AtomicBool::new(false),
             type_info: PhantomData,
-            k: Box::new(hashers),
+            k: hashers,
         }
     }
 
